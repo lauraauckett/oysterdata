@@ -48,8 +48,8 @@ barplot(div$n.by.pop, main="Sample sizes per population",
 bartlett.test(list(div$Hexp,div$Hobs))
 t.test(div$Hexp,div$Hobs,pair=T,var.equal=TRUE,alter="greater")
 
-t.test.lm = (value ~ names, data=div)
-div2 <- as.data.frame(div)
+t.test.lm = (value ~ names, data=div) 
+div2 <- as.data.frame(div) 
 
 oyster.hwt <- hw.test(MyData, B=0)
 oyster.hwt
@@ -131,11 +131,81 @@ poppr(
   minsamp = 10,
   legend = FALSE)
 
+poppr.amova(
+  MyData,
+  hier = NULL,
+  clonecorrect = FALSE,
+  within = TRUE,
+  dist = NULL,
+  squared = TRUE,
+  freq = TRUE,
+  correction = "quasieuclid",
+  sep = "_",
+  filter = FALSE,
+  threshold = 0,
+  algorithm = "farthest_neighbor",
+  threads = 1L,
+  missing = "loci",
+  cutoff = 0.05,
+  quiet = FALSE,
+  method = c("ade4", "pegas"),
+  nperm = 0
+)
 
-
+?strata
 library(graph4lg)
 genpop <- genind_to_genepop(MyData, output = "data.frame")
 genpop
 diffCalc(infile = 'genpop', outfile = 'MyOut', fst = FALSE, pairwise = FALSE,
          bs_locus = FALSE, bs_pairwise = FALSE, boots = NULL,
          ci_type = "individuals", alpha = 0.05, para = FALSE)
+
+
+sum(is.na(MyData$tab))
+X <- tab(MyData, freq = TRUE, NA.method = "mean")
+class(X)
+dim(X)
+X[1:5,1:5]
+pca1 <- dudi.pca(X, scale = FALSE, scannf = FALSE, nf = 3)
+barplot(pca1$eig[1:50], main = "PCA eigenvalues", col = heat.colors(50))
+
+s.label(pca1$li)
+title("PCA of Oyster dataset\naxes 1-2")
+add.scatter.eig(pca1$eig[1:20], 3,1,2)
+pca1
+
+# We can use s.class to represent both
+# the genotypes and inertia ellipses for populations.
+
+s.class(pca1$li, pop(MyData))
+title("PCA of Oyster dataset\naxes 1-2")
+add.scatter.eig(pca1$eig[1:20], 3,1,2)
+
+
+s.class(pca1$li,pop(MyData),xax=1,yax=3,sub="PCA 1-3",csub=2)
+title("PCA of Oyster dataset\naxes 1-3")
+add.scatter.eig(pca1$eig[1:20],nf=3,xax=1,yax=3)
+
+#  we can remove the grid, choose different colors for the groups, use larger dots
+# and transparency to better assess the density of points, and remove internal segments of the
+# ellipses:
+
+col <- funky(15)
+s.class(pca1$li, pop(MyData),xax=1,yax=3, col=transp(col,.6), axesell=FALSE,
+        cstar=0, cpoint=3, grid=FALSE)
+
+# Colors are based on the first three PCs of the PCA, recoded respectively on the red, green,
+# and blue channel. In this figure, the genetic diversity is represented in two complementary
+# ways: by the distances (further away = more genetically different), and by the colors (more
+# different colors = more genetically different).
+
+colorplot(pca1$li, pca1$li, transp=TRUE, cex=3, xlab="PC 1", ylab="PC 2")
+title("PCA of Oyster dataset\naxes 1-2")
+abline(v=0,h=0,col="grey", lty=2)
+
+# We can represent the diversity on the third axis similarly
+
+colorplot(pca1$li[c(1,3)], pca1$li, transp=TRUE, cex=3, xlab="PC 1", ylab="PC 3")
+title("PCA of Oyster dataset\naxes 1-3")
+abline(v=0,h=0,col="grey", lty=2)
+
