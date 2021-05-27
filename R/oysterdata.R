@@ -15,7 +15,21 @@ head(MyData)
 tab(MyData)
 summary(MyData)
 div <- summary(MyData)
+names(div)
+head(div)
 div
+
+MySummary<-basic.stats(MyData)
+
+MySummary$Ho
+mean(MySummary$Ho)
+
+
+par(mfrow=c(2,2))
+barplot(div$Hexp-div$Hobs, main="Heterozygosity: expected-observed",
+        ylab="Hexp - Hobs")
+barplot(div$n.by.pop, main="Sample sizes per population",
+        ylab="Number of genotypes",las=3)
 plot(div$Hobs, xlab="Loci number", ylab="Observed Heterozygosity", 
      main="Observed heterozygosity per locus", col="coral2", pch=20)
 plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozygosity", 
@@ -25,17 +39,23 @@ bartlett.test(list(div$Hexp, div$Hobs))
 basic.stats(MyData[,-1])
 boot.ppfst(dat=MyData,nboot=100,quant=c(0.025,0.975),diploid=TRUE)
 
-pop(MyData)
+
+pop <- pop(MyData)
 basicstat <- basic.stats(MyData, diploid = TRUE, digits = 2)
+div
+
 
 names(basicstat)
 head(basicstat)
 boot.ppfis(MyData)
+
 PCA <- indpca(MyData) 
 plot(PCA, cex = 0.7, col="Coral2")
+
 HW <- hw.test(MyData, B = 1000)
 plot(HW, col="Coral2", pch=18)
 head(HW)
+
 MyClusters <- find.clusters(MyData, max.n.clust = 50)
 head(MyClusters)
 MyClusters
@@ -45,20 +65,14 @@ barplot(div$Hexp-div$Hobs, main="Heterozygosity: expected-observed", ylab="Hexp 
 barplot(div$n.by.pop, main="Sample sizes per population",
         ylab="Number of genotypes",las=3)
 
-bartlett.test(list(div$Hexp,div$Hobs))
 t.test(div$Hexp,div$Hobs,pair=T,var.equal=TRUE,alter="greater")
 
-t.test.lm = (value ~ names, data=div) 
-div2 <- as.data.frame(div) 
 
 oyster.hwt <- hw.test(MyData, B=0)
 oyster.hwt
 
 Fst(as.loci(MyData))
 
-
-fstat(MyData, pop=NULL, fstonly=FALSE)
-pairwise.fst(x, pop=NULL, res.type=c("dist","matrix"), truenames=TRUE)
 
 B2 <- seppop(MyData)$PSHB 
 B2
@@ -108,7 +122,6 @@ inbreed <- rbind(Fbar2, Fbar3, Fbar4)
 class(inbreed)
 INBData <- as.data.frame(inbreed)
 
-basic.stats(MyData,diploid=TRUE,digits=4)
 dev.off()
 
 poppr(
@@ -131,35 +144,9 @@ poppr(
   minsamp = 10,
   legend = FALSE)
 
-poppr.amova(
-  MyData,
-  hier = NULL,
-  clonecorrect = FALSE,
-  within = TRUE,
-  dist = NULL,
-  squared = TRUE,
-  freq = TRUE,
-  correction = "quasieuclid",
-  sep = "_",
-  filter = FALSE,
-  threshold = 0,
-  algorithm = "farthest_neighbor",
-  threads = 1L,
-  missing = "loci",
-  cutoff = 0.05,
-  quiet = FALSE,
-  method = c("ade4", "pegas"),
-  nperm = 0
-)
+names(div$pop.n.all)
 
-?strata
-library(graph4lg)
-genpop <- genind_to_genepop(MyData, output = "data.frame")
-genpop
-diffCalc(infile = 'genpop', outfile = 'MyOut', fst = FALSE, pairwise = FALSE,
-         bs_locus = FALSE, bs_pairwise = FALSE, boots = NULL,
-         ci_type = "individuals", alpha = 0.05, para = FALSE)
-
+dev.off()
 
 sum(is.na(MyData$tab))
 X <- tab(MyData, freq = TRUE, NA.method = "mean")
@@ -208,4 +195,85 @@ abline(v=0,h=0,col="grey", lty=2)
 colorplot(pca1$li[c(1,3)], pca1$li, transp=TRUE, cex=3, xlab="PC 1", ylab="PC 3")
 title("PCA of Oyster dataset\naxes 1-3")
 abline(v=0,h=0,col="grey", lty=2)
+
+# sPCA - couldn't work out! 
+
+
+# Discriminant Analysis of Principal Components (DAPC)
+
+MyData
+grp <- find.clusters(MyData, max.n.clust=50)
+names(grp)
+head(grp$Kstat, 8)
+grp$stat
+head(grp$grp, 10)
+table(pop(MyData), grp$grp)
+table.value(table(pop(MyData), grp$grp), col.lab=paste("inf", 1:6),
+            row.lab=paste("ori", 1:6))
+dapc1 <- dapc(MyData, grp$grp)
+scatter(dapc1)
+# Colour and style
+scatter(dapc1, posi.da="bottomright", bg="white", pch=17:22)
+myCol <- c("darkblue","purple","green","orange","red","blue")
+scatter(dapc1, posi.da="bottomright", bg="white",
+        pch=17:22, cstar=0, col=myCol, scree.pca=TRUE,
+        posi.pca="bottomleft")
+# Add legend
+scatter(dapc1, scree.da=FALSE, bg="white", pch=20, cell=0, cstar=0, col=myCol, solid=.4,
+        cex=3,clab=0, leg=TRUE, txt.leg=paste("Cluster",1:6))
+
+# can also add a minimum spanning tree based on the (squared) distances between
+# populations within the entire space. This allows one to bear in mind the actual proximities
+# between populations inside the entire space, which are not always well represented in susbsets
+# of discriminant functions of lesser rank. We also indicate the centre of each group with
+# crosses. Lastly, we remove the DAPC eigenvalues, not very useful in this case, and replace
+# them manually by a graph of PCA eigenva
+
+scatter(dapc1, ratio.pca=0.3, bg="white", pch=20, cell=0,
+        cstar=0, col=myCol, solid=.4, cex=3, clab=0,
+        mstree=TRUE, scree.da=FALSE, posi.pca="bottomright",
+        leg=TRUE, txt.leg=paste("Cluster",1:6))
+par(xpd=TRUE)
+points(dapc1$grp.coord[,1], dapc1$grp.coord[,2], pch=4,
+       cex=3, lwd=8, col="black")
+points(dapc1$grp.coord[,1], dapc1$grp.coord[,2], pch=4,
+       cex=3, lwd=2, col=myCol)
+myInset <- function(){
+  temp <- dapc1$pca.eig
+  temp <- 100* cumsum(temp)/sum(temp)
+  plot(temp, col=rep(c("black","lightgrey"),
+                     c(dapc1$n.pca,1000)), ylim=c(0,100),
+       xlab="PCA axis", ylab="Cumulated variance (%)",
+       cex=1, pch=20, type="h", lwd=2)
+}
+add.scatter(myInset(), posi="bottomright",
+            inset=c(-0.03,-0.01), ratio=.28,
+            bg=transp("white"))
+scatter(dapc1,1,1, col=myCol, bg="white",
+        scree.da=FALSE, legend=TRUE, solid=.4)
+
+
+genpop <- genind2genpop(
+  MyData,
+  pop = NULL,
+  quiet = FALSE,
+  process.other = FALSE,
+  other.action = mean
+)
+
+names(div)
+div$Hobs
+lm <- lm(div$Hexp~div$Hobs)
+plot(lm)
+lm2 <- lm(div$n.by.pop~div$pop.n.all)
+plot(lm2)
+
+
+
+
+
+
+
+
+
 

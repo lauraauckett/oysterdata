@@ -1,0 +1,51 @@
+---
+title: "Oyster Introgression"
+author: "L. Auckett"
+date: "24/05/2021"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+```{r Oyster packages, include=FALSE}
+setwd("~/Desktop/oysterdata")
+library(usethis)
+library(hierfstat)
+library(ggplot2)
+library(diveRsity)
+library(adegenet)
+library(plotly)
+library(pegas)
+library(ade4)
+library(HardyWeinberg)
+```
+
+```{r Oyster readfile, include=FALSE}
+MyData <- read.genepop("oysterdata.GEN", ncode = 2)
+```
+```{r Oyster Introgression, echo=FALSE}
+# tab(MyData)
+# summary(MyData)
+div <- summary(MyData)
+div
+
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
