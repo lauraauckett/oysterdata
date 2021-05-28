@@ -9,13 +9,22 @@ output: pdf_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Introduction and Methods 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+This report hypothesises that gene flow is resulting in introgression is occurring between wild and selectively bred oysters that share an estuary, and that this introgression is altering the genome of the selectively bred populations.  
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+### Independent variables:
+1. Allele frquency in wild oyster populations
 
+### Dependent variables:
+2. Allele frequency selectively bred oyster populations
 
+The null hypothesis is that there will be no gene flow between wild and selectively bred populations of oysters, and as a result there will be two genetically distinct population clusters shown in the Principal Components Analysis. Assumptions of PCA include multiple variables at continuous levels, a linear relationship between all variables, no significant outliers, sampling adequacy, and adequate correlations suitable for data reduction. 
+A paired t-test was performed to determine whether or not the mean of expected versus observed heterozygosities was significantly different to zero (assumes the differences between pairs are normally distributed).
+A Bartlett test of homogeneity of variances was also performed (assumes dependent variable is normally distributed) with the null hypothesis being that there is no difference in variances. 
+Observed heterozygosity versus expected heterozygosity per locus was also tested for, as was Hardy-Weinberg equilibrium (no mutation, random mating, no gene flow, infinite population size, and no selection). Expected heterozygosity was plotted as a function of observed heterozygosity. 
+
+# Results 
 ```{r Oyster packages, include=FALSE}
 setwd("~/Desktop/oysterdata")
 library(usethis)
@@ -24,9 +33,13 @@ library(ggplot2)
 library(diveRsity)
 library(adegenet)
 library(plotly)
+library(poppr)
 library(pegas)
 library(ade4)
 library(HardyWeinberg)
+library(captioner)
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
 ```
 
 ```{r Oyster readfile, include=FALSE}
@@ -37,15 +50,87 @@ MyData <- read.genepop("oysterdata.GEN", ncode = 2)
 # summary(MyData)
 div <- summary(MyData)
 div
+```
+
+The null hypothesis is retained. There is no gene flow evident between the two populations. The PCA shows there are two distinct population clusters of oysters, one of selectively bred and one of wild. Populations within these clusters overlap but the two clusters themselves have no overlap.
+Bartlett’s test showed that data follows a normal distribution (p = 0.5642, df = 1, K-squared = 0.333).
+
+
+```{r t test, echo=FALSE}
+t.test(div$Hexp,div$Hobs,pair=T,var.equal=TRUE,alter="greater")
+```
+```{r Bartlett, echo=FALSE}  
+bartlett.test(list(div$Hexp, div$Hobs))
+```
+  
+
+
+```{r poppr, include=FALSE}
+poppr(
+  MyData,
+  total = TRUE,
+  sublist = "ALL",
+  exclude = NULL,
+  blacklist = NULL,
+  sample = 0,
+  method = 1,
+  missing = "ignore",
+  cutoff = 0.05,
+  quiet = FALSE,
+  clonecorrect = FALSE,
+  strata = 1,
+  keep = 1,
+  plot = TRUE,
+  hist = TRUE,
+  index = "rbarD",
+  minsamp = 10,
+  legend = FALSE)
 
 ```
 
-## Including Plots
 
-You can also embed plots, for example:
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+
+``````{r Ho He, echo=FALSE}
+plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozygosity")
+figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+``` {r pca1, include=FALSE}
+sum(is.na(MyData$tab))
+X <- tab(MyData, freq = TRUE, NA.method = "mean")
+class(X)
+dim(X)
+X[1:5,1:5]
+pca1 <- dudi.pca(X, scale = FALSE, scannf = FALSE, nf = 3)
+barplot(pca1$eig[1:50], main = "PCA eigenvalues", col = heat.colors(50))
+
+```
+
+``` {r pca2, include=FALSE}
+s.label(pca1$li)
+title("PCA of Oyster dataset\naxes 1-2")
+add.scatter.eig(pca1$eig[1:20], 3,1,2)
+pca1
+```
+
+``` {r pca3, include = FALSE}
+s.class(pca1$li, pop(MyData))
+title("PCA of Oyster dataset\naxes 1-2")
+add.scatter.eig(pca1$eig[1:20], 3,1,2)
+```
+``` {R scatter, include = FALSE}
+s.class(pca1$li,pop(MyData),xax=1,yax=3,sub="PCA 1-3",csub=2)
+title("PCA of Oyster dataset\naxes 1-3")
+add.scatter.eig(pca1$eig[1:20],nf=3,xax=1,yax=3)
+
+``` {r PCA scat, echo = FALSE}
+col <- funky(15)
+s.class(pca1$li, pop(MyData),xax=1,yax=3, col=transp(col,.6), axesell=FALSE,
+        cstar=0, cpoint=3, grid=FALSE)
+figs(name="Figure 2","PCA scatterplot showing distinction between selectively bred (B2) and wild oyster populations")
+
+```
+
+
