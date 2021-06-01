@@ -10,6 +10,8 @@ library(ade4)
 install.packages("HardyWeinberg")
 library(HardyWeinberg)
 
+
+setwd("~/Desktop/oysterdata")
 MyData <- read.genepop("oysterdata.GEN", ncode = 2)
 head(MyData)
 tab(MyData)
@@ -24,6 +26,39 @@ MySummary<-basic.stats(MyData)
 MySummary$Ho
 mean(MySummary$Ho)
 
+?seppop
+splits <- seppop(MyData,pop=MyData@pop,truenames=TRUE,res.type=c("genind","matrix"),
+                 drop=FALSE, treatOther=TRUE, quiet=TRUE)
+
+PSHB2 <- splits$PSHB2
+PSHB2summary <- basic.stats(PSHB2)
+
+
+pshb2ho <- (PSHB2summary$Ho)
+pshb2ho <- as.data.frame(pshb2ho)
+SummaryHo <- MySummary$Ho
+pshb2ho$pop <- c(rep("PSHB2", nrow(pshb2ho)))
+PSHB2 <- as.data.frame
+SummaryHo <- as.data.frame(SummaryHo)
+SummaryHo$pop <- c(rep("ALL", nrow(SummaryHo)))
+
+
+my_summaries <- rbind(SummaryHo, pshb2ho)
+library(dplyr)
+
+SummaryHo <- SummaryHo[,-9] # dropped the 9th column
+colMeans(SummaryHo)
+
+my_summaries <- as.data.frame(my_summaries)
+
+HoMeans <- group_by(my_summaries, pop) %>%
+  summarise(
+    count = n(), mean = mean(Ho, na.rm = TRUE),
+    sd = sd(Ho, na.rm = TRUE)
+  )
+
+# Pull out each stat seperately for each pop (Ho, He, etc). 
+# Create c(rep("B2", nrow(B2_Ho))
 
 par(mfrow=c(2,2))
 barplot(div$Hexp-div$Hobs, main="Heterozygosity: expected-observed",
@@ -32,11 +67,15 @@ barplot(div$n.by.pop, main="Sample sizes per population",
         ylab="Number of genotypes",las=3)
 plot(div$Hobs, xlab="Loci number", ylab="Observed Heterozygosity", 
      main="Observed heterozygosity per locus", col="coral2", pch=20)
+
 plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozygosity", 
      main="Expected heterozygosity as a function of observed heterozygosity per locus")
+figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
+
 
 bartlett.test(list(div$Hexp, div$Hobs))
 basic.stats(MyData[,-1])
+
 boot.ppfst(dat=MyData,nboot=100,quant=c(0.025,0.975),diploid=TRUE)
 
 
@@ -55,6 +94,8 @@ plot(PCA, cex = 0.7, col="Coral2")
 HW <- hw.test(MyData, B = 1000)
 plot(HW, col="Coral2", pch=18)
 head(HW)
+summary(HW)
+HW
 
 MyClusters <- find.clusters(MyData, max.n.clust = 50)
 head(MyClusters)
@@ -270,10 +311,12 @@ plot(lm2)
 
 
 
+install.packages("gtsummary")
+library(gtsummary)
 
+trial2 <- data1 %>% select(Hobs, pop.n.all, Hexp)
 
-
-
-
-
-
+install.packages("captioner")
+library(captioner)
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
