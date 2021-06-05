@@ -1,4 +1,5 @@
 # Library
+install.packages("xtable")
 library(usethis)
 library(hierfstat)
 library(ggplot2)
@@ -25,10 +26,30 @@ head(div)
 div
 
 MySummary<-basic.stats(MyData)
-
+MySummary$n.ind.samp
 MySummary$Ho
 mean(MySummary$Ho)
 
+# HW 
+
+HWalldata <- hw.test(MyData, B = 1000)
+plot(HW, col="Coral2", pch=18)
+head(HW)
+summary(HW)
+HW
+
+# means for table
+
+alldatano <- colMeans(MySummary$n.ind.samp)
+alldataHo <- colMeans(MySummary$Ho)
+alldataHs <- colMeans(MySummary$Hs)
+alldataFis <- colMeans(MySummary$Fis, na.rm = TRUE)
+alldataHW <- colMeans(HWalldata)
+alldatameans <- cbind(alldatano, alldataHo, alldataHs, alldataFis, alldataHW)
+alldatameans
+
+
+# seppop
 ?seppop
 splits <- seppop(MyData,pop=MyData@pop,truenames=TRUE,res.type=c("genind","matrix"),
                  drop=FALSE, treatOther=TRUE, quiet=TRUE)
@@ -112,11 +133,7 @@ boot.ppfis(MyData)
 PCA <- indpca(MyData) 
 plot(PCA, cex = 0.7, col="Coral2")
 
-HW <- hw.test(MyData, B = 1000)
-plot(HW, col="Coral2", pch=18)
-head(HW)
-summary(HW)
-HW
+
 
 MyClusters <- find.clusters(MyData, max.n.clust = 50)
 head(MyClusters)
@@ -357,6 +374,22 @@ tbls <- captioner(prefix="Table")
 
 # kable in knitr for tables 
 
+clusterdata <- read.genepop("ByCluster.GEN", ncode = 2)
 
+head(clusterdata)
+summary(clusterdata)
+names(clusterdata)
+clusterdata$pop
+names(clustersummary)
+clustersummary <- basic.stats(clusterdata)
 
+clustersummary$Ho
+Ho <- colMeans(clustersummary$Ho)
+Hs <- colMeans(clustersummary$Hs)
+Fis <- colMeans(clustersummary$Fis, na.rm = TRUE)
+means <- cbind(Ho, Hs, Fis)
+means
+
+dapc3 <- dapc(MyData, grp$grp)
+scatter(dapc3)
 
