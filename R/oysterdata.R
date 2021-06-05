@@ -7,12 +7,15 @@ library(adegenet)
 library(plotly)
 library(pegas)
 library(ade4)
-install.packages("HardyWeinberg")
+# install.packages("HardyWeinberg")
 library(HardyWeinberg)
-
+library(captioner)
+figs <- captioner(prefix="Figure")
+tbls <- captioner(prefix="Table")
 
 setwd("~/Desktop/oysterdata")
 MyData <- read.genepop("oysterdata.GEN", ncode = 2)
+MyData <- na.omit(MyData)
 head(MyData)
 tab(MyData)
 summary(MyData)
@@ -30,9 +33,9 @@ mean(MySummary$Ho)
 splits <- seppop(MyData,pop=MyData@pop,truenames=TRUE,res.type=c("genind","matrix"),
                  drop=FALSE, treatOther=TRUE, quiet=TRUE)
 
+
 PSHB2 <- splits$PSHB2
 PSHB2summary <- basic.stats(PSHB2)
-
 
 pshb2ho <- (PSHB2summary$Ho)
 pshb2ho <- as.data.frame(pshb2ho)
@@ -48,6 +51,16 @@ library(dplyr)
 
 SummaryHo <- SummaryHo[,-9] # dropped the 9th column
 colMeans(SummaryHo)
+
+SummaryHs <- MySummary$Hs
+
+SummaryHs <- SummaryHs[,-9] # dropped the 9th column
+colMeans(SummaryHs)
+meansHs
+
+SummaryFis <- MySummary$Fis
+SummaryFis <- SummaryFis[,-9] # dropped the 9th column
+colMeans(SummaryFis,na.rm = TRUE)
 
 my_summaries <- as.data.frame(my_summaries)
 
@@ -72,6 +85,14 @@ plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozy
      main="Expected heterozygosity as a function of observed heterozygosity per locus")
 figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
 
+
+hw <- (div$Hexp - div$Hobs)/(div$Hexp)
+plot((div$Hexp - div$Hobs)/(div$Hexp), xlab="Observed Heterozygosity", ylab="Expected Heterozygosity", 
+     main="Expected heterozygosity as a function of observed heterozygosity per locus")
+figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
+
+plot((div$Hexp - div$Hobs)/(div$Hexp))
+test <- (div$Hexp - div$Hobs)
 
 bartlett.test(list(div$Hexp, div$Hobs))
 basic.stats(MyData[,-1])
@@ -164,7 +185,7 @@ class(inbreed)
 INBData <- as.data.frame(inbreed)
 
 dev.off()
-
+library(poppr)
 poppr(
   MyData,
   total = TRUE,
@@ -294,14 +315,6 @@ scatter(dapc1,1,1, col=myCol, bg="white",
         scree.da=FALSE, legend=TRUE, solid=.4)
 
 
-genpop <- genind2genpop(
-  MyData,
-  pop = NULL,
-  quiet = FALSE,
-  process.other = FALSE,
-  other.action = mean
-)
-
 names(div)
 div$Hobs
 lm <- lm(div$Hexp~div$Hobs)
@@ -309,7 +322,26 @@ plot(lm)
 lm2 <- lm(div$n.by.pop~div$pop.n.all)
 plot(lm2)
 
+qqnorm((div$Hexp - div$Hobs)/div$Hexp)
+qqline((div$Hexp - div$Hobs)/div$Hexp)
+t.test((div$Hexp - div$Hobs)/div$Hexp)
 
+qqnorm(div$Hexp - div$Hobs)
+
+hist(div$Hexp - div$Hobs)
+plot(div$Hexp ~ div$Hobs)
+qqnorm(div$Hexp - div$Hobs)
+qqline(div$Hexp - div$Hobs)
+
+
+
+genpop <- genind2genpop(
+  MyData,
+  pop = NULL,
+  quiet = FALSE,
+  process.other = FALSE,
+  other.action = mean
+)
 
 install.packages("gtsummary")
 library(gtsummary)
@@ -320,3 +352,11 @@ install.packages("captioner")
 library(captioner)
 figs <- captioner(prefix="Figure")
 tbls <- captioner(prefix="Table")
+
+
+
+# kable in knitr for tables 
+
+
+
+
