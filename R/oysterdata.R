@@ -11,8 +11,7 @@ library(ade4)
 # install.packages("HardyWeinberg")
 library(HardyWeinberg)
 library(captioner)
-figs <- captioner(prefix="Figure")
-tbls <- captioner(prefix="Table")
+
 
 setwd("~/Desktop/oysterdata")
 MyData <- read.genepop("oysterdata.GEN", ncode = 2)
@@ -104,27 +103,26 @@ plot(div$Hobs, xlab="Loci number", ylab="Observed Heterozygosity",
 
 plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozygosity", 
      main="Expected heterozygosity as a function of observed heterozygosity per locus")
-figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
 
-
-hw <- (div$Hexp - div$Hobs)/(div$Hexp)
 plot((div$Hexp - div$Hobs)/(div$Hexp), xlab="Observed Heterozygosity", ylab="Expected Heterozygosity", 
      main="Expected heterozygosity as a function of observed heterozygosity per locus")
+abline
+
+testhw <- (div$Hexp - div$Hobs)/(div$Hexp)
+summary(testhw)
+
 figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
 
+
+###
 plot((div$Hexp - div$Hobs)/(div$Hexp))
 test <- (div$Hexp - div$Hobs)
-
-bartlett.test(list(div$Hexp, div$Hobs))
-basic.stats(MyData[,-1])
-
 boot.ppfst(dat=MyData,nboot=100,quant=c(0.025,0.975),diploid=TRUE)
-
 
 pop <- pop(MyData)
 basicstat <- basic.stats(MyData, diploid = TRUE, digits = 2)
 div
-
+###
 
 names(basicstat)
 head(basicstat)
@@ -152,35 +150,34 @@ oyster.hwt
 
 Fst(as.loci(MyData))
 
+MyData@pop
 
-B2 <- seppop(MyData)$PSHB 
-B2
+B2 <- seppop(MyData)$PSHB2
 B3 <- seppop(MyData)$WBB2 
+B4 <- seppop(MyData)$QBB2
 
 temp2 <- inbreeding(B2, N=100)
 class(temp2)
 head(names(temp2))
 head(temp2[[1]],20)
 Fbar2 <- sapply(temp2, mean)
-hist(Fbar2, col="firebrick", main="Average inbreeding in Hatchery B2")
+hist(Fbar2, col="firebrick", main="Average inbreeding in PSHB2")
 
 temp3 <- inbreeding(B3, N=100)
 class(temp3)
 head(names(temp3))
 head(temp3[[1]],20)
 Fbar3 <- sapply(temp3, mean)
-hist(Fbar3, col="firebrick", main="Average inbreeding in Woolooware Bay B2")
+hist(Fbar3, col="firebrick", main="Average inbreeding in WBB2")
 
-
-B4 <- seppop(MyData)$QBB2
-B4
 temp4 <- inbreeding(B4, N=100)
 class(temp4)
 head(names(temp4))
 head(temp4[[1]],20)
 Fbar4 <- sapply(temp4, mean)
 hist(Fbar4,breaks=3, col=rgb(1,0,0,0.5), xlab="Average inbreeding coefficient", 
-     ylab="Frequency", main="Average inbreeding in Woolooware Bay B2")
+     ylab="Frequency", main="Average inbreeding in QBB2")
+
 hist(Fbar3, breaks=3, col=rgb(0,0,1,0.5), add=T)
 ?par
 par(
@@ -200,6 +197,9 @@ inbreed <- rbind(Fbar2, Fbar3, Fbar4)
 
 class(inbreed)
 INBData <- as.data.frame(inbreed)
+
+head(INBData)
+INBData$`55`
 
 dev.off()
 library(poppr)

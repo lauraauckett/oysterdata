@@ -45,11 +45,11 @@ Fis <- colMeans(clustersummary$Fis, na.rm = TRUE)
 means <- cbind(Ho, Hs, Fis)
 MEANS2 <- means
 
+# # # MEANS # # # 
+MEANS1
+MEANS2
 
-# plots 
-
-plot(MySummary$Ho, MySummary$Hs, pch=20, cex=0.7)
-abline(0,1,lty=2)
+# Obs Exp
 
 pop(MyData)
 barplot(table(pop(MyData)), col=funky(13), las=2,
@@ -93,9 +93,6 @@ poppr(
   minsamp = 10,
   legend = FALSE)
 
-names(div$pop.n.all)
-
-dev.off()
 
 sum(is.na(MyData$tab))
 X <- tab(MyData, freq = TRUE, NA.method = "mean")
@@ -197,3 +194,13 @@ add.scatter(myInset(), posi="bottomright",
 scatter(dapc1,1,1, col=myCol, bg="white",
         scree.da=FALSE, legend=TRUE, solid=.4)
 
+# T TEST 
+
+qqnorm((div$Hexp - div$Hobs)/div$Hexp)
+qqline((div$Hexp - div$Hobs)/div$Hexp)
+t.test((div$Hexp - div$Hobs)/div$Hexp)
+
+# PLOTS
+
+plot(MySummary$Ho, MySummary$Hs, pch=20, cex=0.7)
+abline(0,1,lty=2)
