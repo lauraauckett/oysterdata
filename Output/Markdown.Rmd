@@ -2,11 +2,19 @@
 title: "Oyster Introgression"
 author: "L. Auckett"
 date: "24/05/2021"
-output: pdf_document
+output:
+  
+  pdf_document: default
+  html_document:
+    df_print: kable
+  word_document: default
+  latex_engine: xelatex
+  always_allow_html: true
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 ```
 
 # Introduction and Methods 
@@ -26,7 +34,6 @@ Observed heterozygosity versus expected heterozygosity per locus was also tested
 
 # Results 
 ```{r Oyster packages, include=FALSE}
-setwd("~/Desktop/oysterdata")
 library(usethis)
 library(hierfstat)
 library(ggplot2)
@@ -36,16 +43,18 @@ library(plotly)
 library(poppr)
 library(pegas)
 library(ade4)
-library(HardyWeinberg)
-library(captioner)
-figs <- captioner(prefix="Figure")
-tbls <- captioner(prefix="Table")
+library(xtable)
+library(knitr)
+library(kableExtra)
+
+
 ```
 
 ```{r Oyster readfile, include=FALSE}
-MyData <- read.genepop("oysterdata.GEN", ncode = 2)
+MyData <- read.genepop("../oysterdata.GEN", ncode = 2)
 ```
-```{r Oyster Introgression, echo=FALSE}
+
+```{r Oyster Introgression, include = FALSE}
 # tab(MyData)
 # summary(MyData)
 div <- summary(MyData)
@@ -59,10 +68,6 @@ Bartlett’s test showed that data follows a normal distribution (p = 0.5642, df
 ```{r t test, echo=FALSE}
 t.test(div$Hexp,div$Hobs,pair=T,var.equal=TRUE,alter="greater")
 ```
-```{r Bartlett, echo=FALSE}  
-bartlett.test(list(div$Hexp, div$Hobs))
-```
-  
 
 
 ```{r poppr, include=FALSE}
@@ -93,7 +98,7 @@ poppr(
 
 ``````{r Ho He, echo=FALSE}
 plot(div$Hobs, div$Hexp, xlab="Observed Heterozygosity", ylab="Expected Heterozygosity")
-figs(name="Figure 1","Expected heterozygosity as a function of observed heterozygosity per locus")
+
 
 ```
 
@@ -129,8 +134,82 @@ add.scatter.eig(pca1$eig[1:20],nf=3,xax=1,yax=3)
 col <- funky(15)
 s.class(pca1$li, pop(MyData),xax=1,yax=3, col=transp(col,.6), axesell=FALSE,
         cstar=0, cpoint=3, grid=FALSE)
-figs(name="Figure 2","PCA scatterplot showing distinction between selectively bred (B2) and wild oyster populations")
+
 
 ```
+**Table 1** Mean and standard deviation of Observed Heterozygosity per population
+``` {r include = FALSE}
+MySummary<-basic.stats(MyData)
+SummaryHo <- MySummary$Ho
 
+SummaryHs <- MySummary$Hs
+
+SummaryFis <- MySummary$Fis
+SummaryFis <- SummaryFis[,-9] 
+colMeans(SummaryFis,na.rm = TRUE)
+
+print.df <- data.frame(Population=names(apply(SummaryHo,2,sd)),
+                      Mean=round(apply(SummaryHo,2,mean),3),
+                      SD=round(apply(SummaryHo,2,sd),3))
+print.df1 <- data.frame(Population=names(apply(SummaryHs,2,sd)),
+                       Mean=round(apply(SummaryHs,2,mean),3),
+                       SD=round(apply(SummaryHs,2,sd),3))
+print.df2 <- data.frame(Population=names(apply(SummaryFis,2,sd)),
+                       Mean=round(apply(SummaryFis,2,mean),3),
+                       SD=round(apply(SummaryFis,2,sd),3))
+```
+
+``` {r echo = FALSE}
+
+
+kable(list(print.df, print.df1), row.names = FALSE)
+kable(print.df2,row.names=FALSE, caption ="Fis")
+```
+
+``` {r include = FALSE}
+
+clusterdata <- read.genepop("../ByCluster.GEN", ncode = 2)
+
+head(clusterdata)
+summary(clusterdata)
+names(clusterdata)
+clusterdata$pop
+clustersummary <- basic.stats(clusterdata)
+
+clustersummary$Ho
+Ho <- colMeans(clustersummary$Ho)
+Hs <- colMeans(clustersummary$Hs)
+Fis <- colMeans(clustersummary$Fis, na.rm = TRUE)
+means <- cbind(Ho, Hs, Fis)
+```
+
+``` {r echo = FALSE}
+kable(means,row.names=TRUE, caption ="Means by cluster")
+```
+
+``` {r echo = FALSE}
+PCA2 <- indpca(clusterdata) 
+plot(PCA2, cex = 0.7, col="Coral2")
+```
+
+``` {r echo = FALSE}
+
+qqnorm((div$Hexp - div$Hobs)/div$Hexp)
+qqline((div$Hexp - div$Hobs)/div$Hexp)
+t.test((div$Hexp - div$Hobs)/div$Hexp)
+
+qqnorm(div$Hexp - div$Hobs)
+
+hist(div$Hexp - div$Hobs)
+```
+```{r echo = FALSE}
+plot(div$Hexp ~ div$Hobs)
+qqnorm(div$Hexp - div$Hobs)
+qqline(div$Hexp - div$Hobs)
+```
+
+```{r echo=FALSE}
+mydata.matFst <- pairwise.fst(MyData,res.type="matrix")
+kable(mydata.matFst[1:8,1:8]) 
+```
 

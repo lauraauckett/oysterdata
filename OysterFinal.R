@@ -19,7 +19,7 @@ tab(MyData)
 div <- summary(MyData)
 
 MySummary<-basic.stats(MyData)
-
+?hierfstat
 # HW
 
 HWalldata <- hw.test(MyData, B = 1000)
@@ -107,6 +107,7 @@ title("PCA of Oyster dataset\naxes 1-2")
 add.scatter.eig(pca1$eig[1:20], 3,1,2)
 pca1
 
+?add.scatter.eig
 # We can use s.class to represent both
 # the genotypes and inertia ellipses for populations.
 
@@ -126,6 +127,8 @@ add.scatter.eig(pca1$eig[1:20],nf=3,xax=1,yax=3)
 col <- funky(15)
 s.class(pca1$li, pop(MyData),xax=1,yax=3, col=transp(col,.6), axesell=FALSE,
         cstar=0, cpoint=3, grid=FALSE)
+
+?s.class
 
 # Colors are based on the first three PCs of the PCA, recoded respectively on the red, green,
 # and blue channel. In this figure, the genetic diversity is represented in two complementary
@@ -150,8 +153,8 @@ head(grp$Kstat, 8)
 grp$stat
 head(grp$grp, 10)
 table(pop(MyData), grp$grp)
-table.value(table(pop(MyData), grp$grp), col.lab=paste("inf", 1:6),
-            row.lab=paste("ori", 1:6))
+table.value(table(pop(MyData), grp$grp), col.lab=paste(1:6),
+            row.lab=paste(1:6))
 dapc1 <- dapc(MyData, grp$grp)
 scatter(dapc1)
 # Colour and style

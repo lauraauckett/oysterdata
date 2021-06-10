@@ -332,6 +332,7 @@ scatter(dapc1,1,1, col=myCol, bg="white",
         scree.da=FALSE, legend=TRUE, solid=.4)
 
 
+
 names(div)
 div$Hobs
 lm <- lm(div$Hexp~div$Hobs)
