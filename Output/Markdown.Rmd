@@ -239,6 +239,10 @@ Small sample sizes cannot be ruled out as the possible cause of the rejection of
 
 In the case of the oyster populations in the Georges River, introgressive gene flow back into wild populations has the potential to restore (over substantial periods of time) the functionality of the oyster reefs by increasing size, resilience to disease and resistance to detrimental effects of environmental changes. 
 
+# Acknowledgements
+
+I would like to acknowledge the help of Drew Allen and Jessica O'Hare, without which this report would not have been possible. 
+
 
 # References
  1 	Coen, L.D. et al. Ecosystem services related to oyster restoration. , Marine Ecology Progress Series, 341. (2007) 
